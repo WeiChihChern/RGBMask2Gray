@@ -7,18 +7,22 @@
 
 #ifndef Mask2Grayscale_h
 #define Mask2Grayscale_h
+#define cimg_use_png
 
 #include "listdir.h"
-#include "opencv2/opencv.hpp"
+//#include "opencv2/opencv.hpp"
+#include "CImg.h"
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 #include <stdlib.h>
+#include <numeric>
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
+using namespace cimg_library;
 
 
 class Mask2Grayscale {
@@ -27,41 +31,45 @@ public:
     Mask2Grayscale() : _class_bgr_loaded(false), _class_bgr(3,0)/*background class*/{};
     
     
+    
     // Where you have RGB masks already and want to conver it to grayscale encoded instead
     // Support .PNG image format for now only
     int convert(const string& path, const string& txtBGRcode)
     {
-        cout << "This app supports .PNG images only for now\n\n\n";
+        cout << "This app supports .PNG images only for now\n";
         
         // Read all file names
         vector<string> rgb_files = listdir::listdir(path);
+        cout << "Detected " << rgb_files.size() << " images\n";
         
         // Read each class's RGB values
         this->_readClassRGBtxt(txtBGRcode);
         
         // Start processing
         #pragma omp parallel for
-        for (size_t i = 0; i < rgb_files.size(); ++i) {
+        for (size_t i = 0; i < rgb_files.size(); ++i)
+        {
             if(
-               rgb_files[i].find(".DS_Store") != -1 || // Mac specific hidden file
-               rgb_files[i].find("classIdx")  != -1    // Prevent user run the app without removing previous generated files
+                   rgb_files[i].find(".DS_Store") != -1 || // Mac specific hidden file
+                   rgb_files[i].find("classIdx")  != -1    // Prevent user run the app without removing previous generated files
                )
-                continue; // Exist for Mac
-            Mat        img = imread(rgb_files[i]);
-            uchar *img_ptr = img.ptr<uchar>(0);
+                    continue;
             
-            // Match rgb values with recorded class color from txtBGRcode
-            for (size_t j = 0; j < img.rows*img.cols*img.channels(); j+=3) {
-                int classIdx   = this->_rgbMatching(img_ptr+j);
-                *(img_ptr+j)   = classIdx;
-                *(img_ptr+j+1) = classIdx;
-                *(img_ptr+j+2) = classIdx;
+            CImg<unsigned char> img(rgb_files[i].c_str());
+            
+            cimg_forXY(img,x,y)
+            {
+                int idx    = this->_rgbMatching(img,x,y);
+                img(x,y,0) = img(x,y,1) = img(x,y,2) = idx;
             }
+
             
             // Finished convert RGB to class number, save it as a new image
             int fileSize = int(rgb_files[i].size());
-            imwrite(rgb_files[i].insert(fileSize - 4 /*4 = .png*/, "_classIdx"), img);
+            img.save(rgb_files[i].insert(fileSize - 4 /*4 = .png*/, "_classIdx").c_str());
+//            imwrite(rgb_files[i].insert(fileSize - 4 /*4 = .png*/, "_classIdx"), img);
         }
+        
         return 0;
     }
     
@@ -83,24 +91,23 @@ private:
           while(getline(myfile, line))
           {
             // Extract number in a string line
-            vector<int> bgr = this->_string2int(line);
-            
+            vector<int> rgb = this->_string2int(line);
               
             // Check correctness
-            if(bgr.size() != 3)
+            if(rgb.size() != 3)
             {
                 cout << "Mask2Grayscale::__readClassRGBtxt() error! txt file of class RGB value should be 3. "
-                     << bgr.size() << " numbers detected.\n They are: ";
-                for (int x = 0; x < bgr.size(); x++)
-                    cout << bgr[x] << " ";
-                assert(bgr.size() != 3);
+                     << rgb.size() << " numbers detected.\n They are: ";
+                for (int x = 0; x < rgb.size(); x++)
+                    cout << rgb[x] << " ";
+                assert(rgb.size() != 3);
             }
             // if correct counts, turn RGB to opencv's BGR format
             // TODO: check number range (0 - 255)
             else
             {
-                for (int x = bgr.size()-1; x > -1; --x)
-                    this->_class_bgr.push_back(bgr[x]);
+                for (int x = 0; x < rgb.size(); ++x)
+                    this->_class_bgr.push_back(rgb[x]);
             }
           }
           myfile.close();
@@ -142,13 +149,15 @@ private:
     // class = 0 | background
     // class = 1 | car class
     // class = 2 | pedestrian class
-    int _rgbMatching(uchar* img_ptr)
+    template<typename _T>
+    int _rgbMatching(CImg<_T>& img, int x, int y)
     {
         int count = 0;
-        for (int i = 0; i < this->_class_bgr.size(); i+=3) {
-            if(*(img_ptr)   == this->_class_bgr[i]   &&
-               *(img_ptr+1) == this->_class_bgr[i+1] &&
-               *(img_ptr+2) == this->_class_bgr[i+2]
+        for (int i = 0; i < this->_class_bgr.size(); i+=3)
+        {
+            if(img(x,y,0) == this->_class_bgr[i]   &&
+               img(x,y,1) == this->_class_bgr[i+1] &&
+               img(x,y,2) == this->_class_bgr[i+2]
                )
             {
                 return count;

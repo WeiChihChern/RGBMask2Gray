@@ -38,6 +38,6 @@ int main(int argc, const char * argv[]) {
     Mask2Grayscale convertTool;
     convertTool.convert(imgPath, classRGBpath);
     
-    
+    cout << "Conversion completed!\n";
     return 0;
 }
