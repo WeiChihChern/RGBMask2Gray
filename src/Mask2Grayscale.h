@@ -28,7 +28,7 @@ using namespace cimg_library;
 class Mask2Grayscale {
 public:
     
-    Mask2Grayscale() : _class_bgr_loaded(false), _class_bgr(3,0)/*background class*/{};
+    Mask2Grayscale() : _class_bgr_loaded(false) {};
     
     
     
