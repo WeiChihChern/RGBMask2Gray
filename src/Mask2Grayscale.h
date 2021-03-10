@@ -7,11 +7,13 @@
 
 #ifndef Mask2Grayscale_h
 #define Mask2Grayscale_h
-#define cimg_use_png
+
 
 #include "listdir.h"
-//#include "opencv2/opencv.hpp"
+
+#define cimg_use_png
 #include "CImg.h"
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -19,9 +21,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <numeric>
+#include <algorithm>
 
 using namespace std;
-//using namespace cv;
 using namespace cimg_library;
 
 
@@ -53,7 +55,11 @@ public:
                    rgb_files[i].find(".DS_Store") != -1 || // Mac specific hidden file
                    rgb_files[i].find("classIdx")  != -1    // Prevent user run the app without removing previous generated files
                )
-                    continue;
+            {
+                cout << "File Skipped: " << rgb_files[i] << endl;
+                continue;
+            }
+
             
             CImg<unsigned char> img(rgb_files[i].c_str());
             
@@ -67,7 +73,6 @@ public:
             // Finished convert RGB to class number, save it as a new image
             int fileSize = int(rgb_files[i].size());
             img.save(rgb_files[i].insert(fileSize - 4 /*4 = .png*/, "_classIdx").c_str());
-//            imwrite(rgb_files[i].insert(fileSize - 4 /*4 = .png*/, "_classIdx"), img);
         }
         
         return 0;
@@ -93,18 +98,17 @@ private:
             // Extract number in a string line
             vector<int> rgb = this->_string2int(line);
               
-            // Check correctness
-            if(rgb.size() != 3)
+            // Check if the line contains only 3 elements
+            if(rgb.size() != 3) // Error
             {
                 cout << "Mask2Grayscale::__readClassRGBtxt() error! txt file of class RGB value should be 3. "
                      << rgb.size() << " numbers detected.\n They are: ";
-                for (int x = 0; x < rgb.size(); x++)
-                    cout << rgb[x] << " ";
+
+                for (int x = 0; x < rgb.size(); x++)    cout << rgb[x] << " ";
+                
                 assert(rgb.size() != 3);
             }
-            // if correct counts, turn RGB to opencv's BGR format
-            // TODO: check number range (0 - 255)
-            else
+            else // if correct counts, turn RGB to opencv's BGR format
             {
                 for (int x = 0; x < rgb.size(); ++x)
                     this->_class_bgr.push_back(rgb[x]);
@@ -135,7 +139,11 @@ private:
                 cache.push_back(s[i]);
             else
             {
-                ans.push_back(stoi(cache));
+                assert(s[i] == ' ' && "Class color txt file should only contains numbers and spaces only, please double check the file.\n");
+                int color_val = stoi(cache);
+                assert(color_val <= 255 && "Each value for R, G, and B should be within range [0 - 255]");
+
+                ans.push_back(color_val);
                 cache.clear();
             }
         }
