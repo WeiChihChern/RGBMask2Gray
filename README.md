@@ -1,7 +1,7 @@
 # RGBMask2Gray
 Convert RGB masks for semantic segmentation to grayscale with user given text file. Support .PNG only for now.
 <p align="center">
-  **<img width="431" alt="image" src="https://user-images.githubusercontent.com/40074617/114333263-e4318080-9b15-11eb-8b20-46e3fc957794.png">**
+  <img width="444" alt="image" src="https://user-images.githubusercontent.com/40074617/114411631-5c319200-9b7a-11eb-9191-2f410ed14f88.png">
 </p>
 
 ## How to use it
