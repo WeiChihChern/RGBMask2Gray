@@ -1,5 +1,5 @@
 # RGBMask2Gray
-Convert RGB masks for semantic segmentation to grayscale base on its class index. Support .PNG only for now.
+Convert RGB masks for semantic segmentation to one-hot encoded with user given text file. Support .PNG only for now.
 <p align="center">
   <img width="431" alt="image" src="https://user-images.githubusercontent.com/40074617/114333263-e4318080-9b15-11eb-8b20-46e3fc957794.png">
 </p>
