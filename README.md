@@ -17,6 +17,7 @@ docker run -it --rm wchern/open:RGBMask2Gray -v $(pwd):/my-data bash -c "./RGBMa
 - See the figure above to construct your own txt files. The .txt should contain numbers ONLY.</br>
 </br>
 </br>
-### Dependency</br>
+
+### Dependency
 - CImg </br>
 - argparse
