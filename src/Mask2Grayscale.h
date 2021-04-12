@@ -82,8 +82,8 @@ public:
     
 private:
     vector<unsigned char> _class_bgr; // Each class has R, G, and B 3 elements
-    bool  _class_bgr_loaded;
     int   _nClass;
+    bool  _class_bgr_loaded;
     
     
     void _readClassRGBtxt(const string& txtFile)
