@@ -8,7 +8,7 @@ Convert RGB masks for semantic segmentation to grayscale with user given text fi
 
 #### Demo
 ```
-docker run -it --rm wchern/open:RGBMask2Gray bash -c "./RGBMask2Gray -ImagePath ../demo/images -ClassRGBPath ../demo/test.txt
+docker run -it --rm wchern/open:RGBMask2Gray bash -c "./RGBMask2Gray -ImagePath ../demo/images -ClassRGBPath ../demo/test.txt"
 ```
 #### Your data
 ```
